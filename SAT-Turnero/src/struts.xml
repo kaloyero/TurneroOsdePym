@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+"http://struts.apache.org/dtds/struts-2.0.dtd">
+
+																				<!--  Turnero  -->
+ 
+<struts>
+
+ 	<constant name="struts.custom.i18n.resources" value="ApplicationResources"></constant>
+	
+ 
+	<package name="default" extends="struts-default" namespace="/">
+
+	 <action name="inicio"  class="ar.com.osdepym.template.web.action.SectorAction">
+			<result name="success">/jsp/turnero.jsp</result>
+			<result name="error">/jsp/error.jsp</result>
+	</action>
+	
+	<action name="sacarTicket" class="ar.com.osdepym.template.web.action.SectorAction" method="sacarTicket">
+     		<result name="success">/jsp/ticket.jsp</result>
+			<result name="error">/jsp/error.jsp</result>
+	</action>
+	
+	<action name="shutdown" class="ar.com.osdepym.template.web.action.ShutdownAction" method="shutdown">
+		<result name="success">/jsp/apagar.jsp</result>
+		<result name="reiniciar">/jsp/reiniciar.jsp</result>
+		<result name="error">/jsp/error.jsp</result>
+	</action>
+	</package>
+	
+</struts>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+"http://struts.apache.org/dtds/struts-2.0.dtd">
+<!-- Login -->
+<struts>
+
+	<constant name="struts.custom.i18n.resources" value="ApplicationResources"></constant>
+	<package name="default" extends="struts-default,json-default"
+		namespace="/">
+
+		<result-types>
+			<result-type name="json" class="org.apache.struts2.json.JSONResult" />
+		</result-types>
+		<action name="inicio"
+			class="ar.com.osdepym.template.web.action.PantallaAction" method="inicio">
+			<result name="success">/jsp/login.jsp</result>
+			<result name="logueado">/jsp/homepage.jsp</result>
+			<result name="logueadoEstadis">/jsp/estadisticas.jsp</result>
+		</action>
+		<action name="pantalla"
+			class="ar.com.osdepym.template.web.action.PantallaAction" method="execute">
+			<result name="success">/jsp/homepage.jsp</result>
+			<result name="successestad">/jsp/estadisticas.jsp</result>
+			<result name="error">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="desconectar"
+			class="ar.com.osdepym.template.web.action.PantallaAction" method="desconectar">
+			<result name="success">/jsp/login.jsp</result>
+		</action>
+	<action name="exportar"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="exportar">
+			<result name="success" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="inputName">fileInputStream</param>
+				<param name="contentDisposition">attachment;filename=${nomArchivoExp}</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+			<result name="inicio">/jsp>login.jsp</result>
+		</action>
+		
+		<action name="generarTablero"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="generarTablero">
+			<result name="success">/jsp/mostrarTablero.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+			<result name="error">/jsp/errorSinDatos.jsp</result>
+		</action>
+		<action name="refreshTablero"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="generarTablero">
+			<result type="json" name="success"></result>
+		</action>
+	
+		
+		<action name="generarEstadisticas"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="execute">
+			<result name="success">/jsp/estadisticas.jsp</result>
+			<result name="error">/jsp/errorSinDatos.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="clientesNoLlamados"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="clientesNoLlamados">
+			<result name="success">/jsp/mostrarEstadisticas.jsp</result>
+			<result name="error">/jsp/errorEstadisticas.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="todasSucursales"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="todasSucursales">
+			<result name="success">/jsp/mostrarEstadisticas.jsp</result>
+			<result name="error">/jsp/errorEstadisticas.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="exportar"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="exportar">
+			<result name="success" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="inputName">fileInputStream</param>
+				<param name="contentDisposition">attachment;filename=${nomArchivoExp}</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+			<result name="inicio">/jsp>login.jsp</result>
+			
+		</action>
+<action name="exportarEspecial"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="exportarEspecial">
+			<result name="success" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="inputName">fileInputStream</param>
+				<param name="contentDisposition">attachment;filename=${nomArchivoExp}</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+			<result name="inicio">/jsp>login.jsp</result>
+			
+		</action>
+		
+
+		<action name="volverEstadisticas"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="volverEstadisticas">
+			<result name="success">/jsp/estadisticas.jsp</result>
+			<result name="error">/jsp/errorPage.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+
+		</action>
+		<action name="tiempoEsperaPromedioSec"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="tiempoEsperaPromedioSec">
+			<result name="success">/jsp/mostrarEstadisticas.jsp</result>
+			<result name="error">/jsp/errorEstadisticas.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="tiempoEsperaPromedioUse"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="tiempoEsperaPromedioUse">
+			<result name="success">/jsp/mostrarEstadisticas.jsp</result>
+			<result name="error">/jsp/errorEstadisticas.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="clientesAtendidosPuesto"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="clientesAtendidosPuesto">
+			<result name="success">/jsp/mostrarEstadisticas.jsp</result>
+			<result name="error">/jsp/errorEstadisticas.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="clientesAtendidosPorSector"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="clientesAtendidosPorSucursal">
+			<result name="success">/jsp/mostrarEstadisticas.jsp</result>
+			<result name="error">/jsp/errorEstadisticas.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="resumenSucursales"
+			class="ar.com.osdepym.template.web.action.EstadisticasAction" method="resumenSucursales">
+			<result name="success">/jsp/mostrarEstadisticasEspecial.jsp</result>
+			<result name="error">/jsp/errorEstadisticas.jsp</result>
+			<result name="errornull">/jsp/errorPage.jsp</result>
+		</action>
+		<action name="enEspera"
+			class="ar.com.osdepym.template.web.action.PantallaAction" method="enEspera">
+			<result type="json" name="success"></result>
+		</action>
+	
+
+
+
+	</package>
+
+</struts>

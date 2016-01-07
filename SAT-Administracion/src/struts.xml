@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+"http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<!-- Turnero -->
+
+<struts>
+
+	<constant name="struts.custom.i18n.resources" value="ApplicationResources"></constant>
+
+	<package name="json" extends="json-default,struts-default"
+		namespace="/">
+		
+		<action name="inicio" class="ar.com.osdepym.template.web.action.LoginAction"
+			method="inicio">
+				<result name="success">/jsp/login.jsp</result>
+				<result name="logueado" >/jsp/administracion.jsp</result>
+		</action>
+		
+		<action name="login" class="ar.com.osdepym.template.web.action.LoginAction"
+			method="login">
+			<result name="success">/jsp/administracion.jsp</result>
+			<result name="error">/jsp/errorPage.jsp</result>
+			<result name="errorLogueado">/jsp/errorUsuarioLogueado.jsp</result>
+		</action>
+		<action name="continuar" class="ar.com.osdepym.template.web.action.LoginAction" method="continuar">
+			<result name="success" >/jsp/administracion.jsp</result>
+		</action>
+		<action name="desconectar" class="ar.com.osdepym.template.web.action.LoginAction"
+			method="desconectar">
+			<result name="success">/</result>
+		</action>
+		<action name="listaSectores"
+			class="ar.com.osdepym.template.web.action.SectorDatatableAction"
+			method="listaSectores">
+			<result type="json" />
+		</action>
+
+		<action name="sectoresOperaciones"
+			class="ar.com.osdepym.template.web.action.SectorDatatableAction"
+			method="sectoresOperaciones">
+			<result type="json" />
+		</action>
+
+		<action name="listaUsuarios"
+			class="ar.com.osdepym.template.web.action.UsuarioDatatableAction"
+			method="listaUsuarios">
+			<result type="json" />
+		</action>
+
+		<action name="usuariosOperaciones"
+			class="ar.com.osdepym.template.web.action.UsuarioDatatableAction"
+			method="usuariosOperaciones">
+			<result type="json" />
+		</action>
+
+		<action name="listaPuestos"
+			class="ar.com.osdepym.template.web.action.PuestoDatatableAction"
+			method="listaPuestos">
+			<result type="json" />
+		</action>
+
+		<action name="puestosOperaciones"
+			class="ar.com.osdepym.template.web.action.PuestoDatatableAction"
+			method="puestosOperaciones">
+			<result type="json" />
+		</action>
+
+		<action name="listaUsuarioSectores"
+			class="ar.com.osdepym.template.web.action.UsuarioSectoresDatatableAction"
+			method="listaUsuarioSectores">
+			<result type="json" />
+		</action>
+
+		<action name="usuarioSectoresOperaciones"
+			class="ar.com.osdepym.template.web.action.UsuarioSectoresDatatableAction"
+			method="usuarioSectoresOperaciones">
+			<result type="json" />
+		</action>
+      <action name="listaSucursales"
+			class="ar.com.osdepym.template.web.action.SucursalDatatableAction"
+			method="listaSucursales">
+			<result type="json" />
+		</action>
+
+		<action name="sucursalOperaciones"
+			class="ar.com.osdepym.template.web.action.SucursalDatatableAction"
+			method="sucursalesOperaciones">
+			<result type="json" />
+		</action>
+	</package>
+</struts>

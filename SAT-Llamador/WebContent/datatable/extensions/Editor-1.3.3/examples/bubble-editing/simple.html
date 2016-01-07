@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" type="image/ico" href="http://www.datatables.net/favicon.ico">
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
+
+	<title>Editor example - Simple bubble editing</title>
+	<link rel="stylesheet" type="text/css" href="../../../../media/css/jquery.dataTables.css">
+	<link rel="stylesheet" type="text/css" href="../../../TableTools/css/dataTables.tableTools.css">
+	<link rel="stylesheet" type="text/css" href="../../css/dataTables.editor.css">
+	<link rel="stylesheet" type="text/css" href=
+	"//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css">
+		<link rel="stylesheet" type="text/css" href="../../../../examples/resources/syntax/shCore.css">
+	
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="../../../../examples/resources/demo.css">
+	<style type="text/css" class="init">
+
+	table.dataTable tr td:first-child {
+		text-align: center;
+	}
+
+	table.dataTable tr td:first-child:before {
+		content: "\f096"; /* fa-square-o */
+		font-family: FontAwesome;
+	}
+
+	table.dataTable tr.selected td:first-child:before {
+		content: "\f046"; /* fa-check-square-o */
+	}
+
+	</style>
+	<script type="text/javascript" language="javascript" src="../../../../media/js/jquery.js"></script>
+	  <script src="../../../../examples/resources/jquery-ui.js"></script>
+	<script type="text/javascript" language="javascript" src="../../../../media/js/jquery.dataTables.js"></script>
+	<script type="text/javascript" language="javascript" src="../../../TableTools/js/dataTables.tableTools.js"></script>
+	<script type="text/javascript" language="javascript" src="../../js/dataTables.editor.js"></script>
+	<script type="text/javascript" language="javascript" src="../../../../examples/resources/syntax/shCore.js"></script>
+	<script type="text/javascript" language="javascript" src="../../../../examples/resources/demo.js"></script>
+	<script type="text/javascript" language="javascript" src="../resources/editor-demo.js"></script>
+	<script type="text/javascript" language="javascript" class="init">
+
+
+	
+var editorSectores; // use a global for the submit and return data rendering in the examples
+var editorPuestos; 
+var editorUsuarios; 
+var oTablePuestos;
+$(document).ready(function() {
+	var self =this;
+	$("#tabs").tabs( {
+        "activate": function(event, ui) {
+            var table = $.fn.dataTable.fnTables(true);
+            if ( table.length > 0 ) {
+                $(table).dataTable().fnAdjustColumnSizing();
+            }
+        }
+    } );
+
+	editorSectores = new $.fn.dataTable.Editor( {
+		ajax: "http://localhost:8080/Administracion/sectoresOperaciones.action",
+		table: "#example",
+		fields: [ {
+				label: "Sector",
+				name: "sector"
+			}, {
+				label: "Codigo Sector:",
+				name: "codigoSector"
+			}, {
+				label: "Nombre Sector:",
+				name: "nombreSector"
+			}, {
+				label: "Habilitado:",
+				name: "habilitado",
+				type:  "select",
+	                ipOpts: [
+	                    { label: "SI", value: "SI" },
+	                    { label: "NO",           value: "NO" }
+	                ]
+				
+				
+			}],
+			i18n:  {
+			    create:{
+			    	button:"Nuevo",
+			    	title:"Nuevo",
+			    	submit:"Guardar"
+			    },
+			    edit:{
+			    	button:"Editar",
+			    	title:"Edicion",
+			    	submit:"Guardar"
+			    },
+			    error:{
+			    	system:"No se pudo completar la operacion"
+			    }
+			}
+			
+	} );
+	
+	editorSectores.on("preSubmit",function(e,o){
+		
+		return validarSector(e,o)
+	})
+	
+
+	editorUsuarios = new $.fn.dataTable.Editor( {
+		ajax: "http://localhost:8080/Administracion/usuariosOperaciones.action",
+		table: "#example1",
+	
+		fields: [ {
+				label: "Nombre Usuario",
+				name: "nombreUsuario"
+			}, {
+				label: "Password:",
+				name: "password"
+			}, {
+				label: "Perfil:",
+				name: "perfilId",
+				type:  "select",
+                ipOpts: [
+                    { label: "Administrador", value: "1" },
+                    { label: "Usuario",       value: "2" },
+                    { label: "Estadistica",   value: "3" }
+                ]
+			},
+			 {
+				label: "Puesto:",
+				name: "puestoId",
+				type:  "select",
+			}
+		],
+	i18n:  {
+		    create:{
+		    	button:"Nuevo",
+		    	title:"Nuevo",
+		    	submit:"Guardar"
+		    },
+		    edit:{
+		    	button:"Editar",
+		    	title:"Edicion",
+		    	submit:"Guardar"
+		    },
+		    error:{
+		    	system:"No se pudo completar la operacion"
+		    }
+		}
+	} );
+	editorUsuarios.on("initCreate",function(){
+	
+		this.field("puestoId").update(getPuestos())
+	})
+	editorUsuarios.on("preSubmit",function(e,o){
+	
+		return validarUsuario(e,o)
+	})
+	
+	
+	editorUsuarios.on("initEdit",function(){
+		
+		this.field("puestoId").update(getPuestos())
+	})
+	
+	
+	editorPuestos = new $.fn.dataTable.Editor( {
+		ajax: "http://localhost:8080/Administracion/puestosOperaciones.action",
+		table: "#example2",
+		fields: [ {
+				label: "Puesto",
+				name: "puesto"
+			}, {
+				label: "Ip:",
+				name: "ip"
+			}
+		],
+		i18n:  {
+		    create:{
+		    	button:"Nuevo",
+		    	title:"Nuevo",
+		    	submit:"Guardar"
+		    },
+		    edit:{
+		    	button:"Editar",
+		    	title:"Edicion",
+		    	submit:"Guardar"
+		    },
+		    error:{
+		    	system:"No se pudo completar la operacion"
+		    }
+		}
+	} );
+
+	// Activate the bubble editor on click of a table cell
+	$('#example').on( 'click', 'tbody td:not(:first-child)', function (e) {
+		//editor.bubble( this );
+	} );
+
+	$('#example').DataTable( {
+		dom: "Tfrtip",
+		scrollY: 300,
+		paging: false,
+		language:{
+			"info":"Mostrando _START_ a _END_ de _TOTAL_ registros",
+			"search":"Busqueda",
+			"infoEmpty":"No existe informacion",
+			"emptyTable":"No existe informacion",
+			"zeroRecords":"No existe informacion",
+			"infoFiltered":"(Filtrando de un maximo de _MAX_ registros)"
+		},
+		ajax: "http://localhost:8080/Administracion/listaSectores.action",
+		columns: [
+			{ data: null, defaultContent: '', orderable: false },
+			{ data: "sector" },
+			{ data: "codigoSector" },
+			{ data: "nombreSector" },
+			{ data: "habilitado" }
+		],
+		order: [ 1, 'asc' ],
+		tableTools: {
+			sRowSelect: "os",
+			sRowSelector: 'td:first-child',
+			aButtons: [
+					{ sExtends: "editor_create", editor: editorSectores ,sButtonText: "Crear"},
+					{ sExtends: "editor_edit",   editor: editorSectores ,sButtonText: "Editar"},
+					{ sExtends: "editor_remove", editor: editorSectores, sButtonText: "Borrar" }
+			]
+		}
+	} );
+	
+	
+	
+	$('#example1').DataTable( {
+		dom: "Tfrtip",
+		scrollY: 300,
+		paging: false,
+		language:{
+			"info":"Mostrando _START_ a _END_ de _TOTAL_ registros",
+			"search":"Busqueda",
+			"infoEmpty":"No existe informacion",
+			"emptyTable":"No existe informacion",
+			"zeroRecords":"No existe informacion",
+			"infoFiltered":"(Filtrando de un maximo de _MAX_ registros)"
+		},
+		ajax: "http://localhost:8080/Administracion/listaUsuarios.action",
+		columns: [	{ data: null, defaultContent: '', orderable: false },
+			{ data: "nombreUsuario" },
+			{ data: "password" },
+			{ data: "nombrePerfil" },
+			{ data: "nombrePuesto" }
+		],
+		order: [ 1, 'asc' ],
+		tableTools: {
+			sRowSelect: "os",
+			sRowSelector: 'td:first-child',
+			aButtons: [
+				{ sExtends: "editor_create", editor: editorUsuarios ,sButtonText: "Crear"},
+				{ sExtends: "editor_edit",   editor: editorUsuarios ,sButtonText: "Editar"},
+				{ sExtends: "editor_remove", editor: editorUsuarios, sButtonText: "Borrar" }
+			]
+		},
+		
+	} );
+	oTablePuestos=$('#example2').DataTable( {
+		dom: "Tfrtip",
+		scrollY: 300,
+		paging: false,
+		language:{
+			"info":"Mostrando _START_ a _END_ de _TOTAL_ registros",
+			"search":"Busqueda",
+			"infoEmpty":"No existe informacion",
+			"emptyTable":"No existe informacion",
+			"zeroRecords":"No existe informacion",
+			"infoFiltered":"(Filtrando de un maximo de _MAX_ registros)"
+		},
+		ajax: "http://localhost:8080/Administracion/listaPuestos.action",
+		columns: [	{ data: null, defaultContent: '', orderable: false },
+			{ data: "puesto" },
+			{ data: "ip" }
+		],
+		order: [ 1, 'asc' ],
+		tableTools: {
+			sRowSelect: "os",
+			sRowSelector: 'td:first-child',
+			aButtons: [
+				{ sExtends: "editor_create", editor: editorPuestos ,sButtonText: "Crear"},
+				{ sExtends: "editor_edit",   editor: editorPuestos ,sButtonText: "Editar"},
+				{ sExtends: "editor_remove", editor: editorPuestos, sButtonText: "Borrar" }
+			]
+		}
+	} );
+	function getPuestos() {
+		var puestos=new Array()
+
+		for ( var i = 0; i < oTablePuestos.data().length; i++) {
+					var puesto=new Object()
+					puesto.value=oTablePuestos.data()[i]["DT_RowId"]
+					puesto.label=oTablePuestos.data()[i]["puesto"]
+					puestos.push(puesto);
+				}
+		return puestos
+	}
+	function validarUsuario(e,o) {
+		
+	   var typeReturn=true
+		
+		if (o.data.nombreUsuario===""){
+			editorUsuarios.error("nombreUsuario","Campo Requerido")
+			typeReturn=false;
+		}else{
+			if (o.data.nombreUsuario.length >20){
+				editorUsuarios.error("nombreUsuario","El total de caracteres permitido es menor que 20")
+				typeReturn=false;
+			}
+		}
+	   if (o.data.password===""){
+			editorUsuarios.error("password","Campo Requerido")
+			typeReturn=false;
+		}else{
+			if (o.data.password.length >20){
+				editorUsuarios.error("password","El total de caracteres permitido es menor que 20")
+				typeReturn=false;
+			}
+		}
+	   if (o.data.perfilId===""){
+			editorUsuarios.error("perfilId","Campo Requerido")
+			typeReturn=false;
+		}
+	   if (o.data.puestoId===""){
+			editorUsuarios.error("puestoId","Campo Requerido")
+			typeReturn=false;
+		}
+	   
+	   return typeReturn;
+	}
+	function validarSector(e,o) {
+	
+	var typeReturn=true
+	
+	if (o.data.sector===""){
+		editorSectores.error("sector","Campo Requerido")
+		typeReturn=false;
+	}else{
+		if (o.data.sector.length >20){
+			editorSectores.error("sector","El total de caracteres permitido es menor que 20")
+			typeReturn=false;
+		}
+	}
+	
+	if (o.data.nombreSector===""){
+		editorSectores.error("nombreSector","Campo Requerido")
+		typeReturn=false;
+	}else{
+		if (o.data.nombreSector.length >20){
+			editorSectores.error("nombreSector","El total de caracteres permitido es menor que 20")
+			typeReturn=false;
+		}
+	}
+   
+	if (o.data.codigoSector===""){
+	   editorSectores.error("codigoSector","Campo Requerido")
+		typeReturn=false;
+	}else{
+		if (o.data.codigoSector.length >1){
+			editorSectores.error("codigoSector","El total de caracteres permitido es menor que 1")
+			typeReturn=false;
+		}
+	}
+   if (o.data.habilitado===""){
+	   editorSectores.error("habilitado","Campo Requerido")
+		typeReturn=false;
+	}
+ 
+   
+   return typeReturn;
+	}
+} );
+
+
+
+	</script>
+</head>
+
+<body class="dt-example">
+	<div class="container">
+		<section>
+			<h1>Administracion <span>V.1</span></h1>
+
+			
+		</section>
+	</div>
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-1">Sector</a></li>
+    <li><a href="#tabs-2">Usuarios</a></li>
+    <li><a href="#tabs-3">Puestos</a></li>
+  </ul>
+  <div id="tabs-1">
+  <table id="example" class="display" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th>
+
+						<th>Sector</th>
+						<th>Codigo Sector</th>
+						<th>Nombre Sector</th>
+						<th>Habilitado</th>
+						
+					</tr>
+				</thead>
+			</table>
+  </div>
+  <div id="tabs-2">
+<table id="example1" class="display" cellspacing="0">
+				<thead>
+					<tr>
+						<th>
+
+						<th>Nombre Usuario</th>
+						<th>Password</th>
+						<th>Perfil</th>
+						<th>Puesto</th>
+					</tr>
+				</thead>
+			</table> 
+ </div>
+  <div id="tabs-3">
+  <table id="example2" class="display" cellspacing="0" style="margin-left: 0px; width: 1197px;" >
+				<thead>
+					<tr>
+						<th>
+
+						<th>Puesto</th>
+						<th>Ip</th>
+						
+					</tr>
+				</thead>
+			</table> 
+  </div>
+</div>
+
+
+	<section>
+		
+	</section>
+</body>
+</html>
