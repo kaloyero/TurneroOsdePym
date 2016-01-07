@@ -9,6 +9,7 @@
 *.ear
 */target
 */.settings
+*/build/classes
 *.project
 *.tern-project
 *.classpath
