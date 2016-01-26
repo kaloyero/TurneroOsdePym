@@ -38,13 +38,27 @@ idleTime = 0;
 		}
 		return i;
 	}
+	function habilitarBotonForzar(){
+		$("#botonForzar" ).prop("disabled",false)
+		$("#botonForzar" ).css("color","#007a4d")
+		$("#botonForzar" ).text("Actualizar Sucursales")
+	}
+	function deshabilitarBotonForzar(){
+		$("#botonForzar" ).prop("disabled",true)
+		$("#botonForzar" ).css("color","#B3A7A7")
+		$("#botonForzar" ).text("Actualizando...")
+	}
+	
 	window.onload = function() {
 		startTime();
 		$("#botonForzar" ).click(function() {
+
+			deshabilitarBotonForzar()
+			
 		    alert("Se ha iniciando la actualización de sucursales...")
 			$.ajax({
 			    // la URL para la petición
-			    url : 'http://localhost/CESAT-TurneroBatch/servicio/ejecutarAhora',
+			    url : '/CESAT-TurneroBatch/servicio/ejecutarAhora',
 			    type : 'GET',
 			 
 			    // el tipo de información que se espera de respuesta
@@ -53,7 +67,6 @@ idleTime = 0;
 			    // código a ejecutar si la petición es satisfactoria;
 			    // la respuesta es pasada como argumento a la función
 			    success : function(json) {
-			    	console.log("")
 //			        alert("Sucursales actualizadas con Exito!")
 			    },
 			 
@@ -61,6 +74,7 @@ idleTime = 0;
 			    // son pasados como argumentos a la función
 			    // el objeto de la petición en crudo y código de estatus de la petición
 			    error : function(xhr, status) {
+			    	habilitarBotonForzar()
 			        alert('Error de comunicación, por favor intente nuevamente');
 			    }
 			});
@@ -86,6 +100,46 @@ idleTime = 0;
         	window.location.href="desconectar.action"
         }
         	}
+</script>
+<script>
+	$(document)
+			.ready(
+					function() {
+						var terminoAnterior=true;
+						intervaloActualizacionBatch();
+
+
+						function intervaloActualizacionBatch() {
+							setInterval(function() {
+								console.log("terminoanteriorIntervalo",terminoAnterior)
+								
+								if (terminoAnterior)
+								 obtenerActualizacionBatch()
+							}, 4000);
+						}
+						
+						function obtenerActualizacionBatch() {
+							terminoAnterior=false;
+							$
+									.ajax({
+										 url : '/CESAT-TurneroBatch/servicio/obtenerEstadoBatch',
+										    type : 'GET',
+										success : function(data) {
+											terminoAnterior=true;
+											console.log("terminoanteriorSucccess",data)
+											if (data == "A"){
+												deshabilitarBotonForzar()
+											} else {
+												habilitarBotonForzar()
+											}
+											
+										}
+
+									})
+						}
+
+
+					});
 </script>
 <script>
 	$(function() {

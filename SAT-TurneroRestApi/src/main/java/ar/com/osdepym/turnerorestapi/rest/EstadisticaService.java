@@ -37,6 +37,22 @@ public class EstadisticaService {
 		return estadisticas;
 	}
 
+	
+	/**
+	 * Servicio que devuelve los turnos de la sucursal que se van a actualizar
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/getActualizaTurnosLlamados")
+	public synchronized List<TurnoEstadistica> getActualizaTurnosLlamados(@RequestParam(value = "id",required = false,
+	                                                    defaultValue = "0") Integer id) {
+		List<TurnoEstadistica> turnos = consultaDao.getActualizaTurnosLlamados(id);
+		
+		return turnos;
+	}
+	
+	
 	/**
 	 * Servicio de prueba
 	 * 

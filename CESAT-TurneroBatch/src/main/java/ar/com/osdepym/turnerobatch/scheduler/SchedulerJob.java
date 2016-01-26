@@ -29,8 +29,9 @@ public class SchedulerJob implements Job {
 
 	private static final String PROTOCOLO = "http://";
 	private static final String PROYECTO = "/SAT-TurneroRestApi";
-	private static final String SERVICIO = "/servicio/getEstadisitica";
-
+	private static final String SERVICIO_ESTADISTICAS = "/servicio/getEstadisitica";
+	private static final String SERVICIO_ACTUALIZA_LLAMADOS = "/servicio/getActualizaTurnosLlamados";
+	private static final String SERVICIO_BATCH_ACTUALIZAR_PERIODO = "http://localhost/CESAT-TurneroBatch/servicio/updatePeriodBatch";
 	
 	@Autowired
 	ConsultaDao consultaDao = new ConsultaDaoImpl();
@@ -41,34 +42,55 @@ public class SchedulerJob implements Job {
 	@Override
 	public synchronized void execute(JobExecutionContext context)
 			throws JobExecutionException {
+		/*Actualizo el tiempo de repetición del batch */
+		actualizarPeriodoBatch (context);
+		
+		/* Consulto estado de actualizaciòn del batch */
+		String estadoActualizacionBatch = consultaDao.getEstadoActualizacionBatch();
+		if (estadoActualizacionBatch.equalsIgnoreCase(ConsultaDao.ESTADO_ACTUALIZACION_NOACTUALIZA)){
 
-		for (Sucursal suc : consultaDao.getSucursales()) {
-			int idSuc = suc.getId_sat();
-			try {
-				//Verifico si la sucursal no se esta actualizando en este momento
-//				String estadoSuc = consultaDao.getEstadoActualizacion(idSuc);
-//				if (estadoSuc.equals(ConsultaDao.ESTADO_ACTUALIZACION_NOACTUALIZA)){
-					//Bloqueo la Sucursal para que se actualice
-//					consultaDao.actualizarEstadoActualizacion(ConsultaDao.ESTADO_ACTUALIZACION_ACTUALIZANDO, idSuc);
-					//Actualizo la información de turnos en la central
-					actualizoCentral(suc);
-//				} else {
-//					System.out.println("SUCURSAL EN PROCESO DE ACTUALIZACION");
-//				}
-				
-			} catch (Exception e) {
-				System.out.println("Error al comunicarse con la central: "+ suc.getNom_sucursal());
-			} finally {
-				//Desbloqueo la Sucursal para que pueda Actualizarce
-//				consultaDao.actualizarEstadoActualizacion(ConsultaDao.ESTADO_ACTUALIZACION_NOACTUALIZA, idSuc);
+			/*Actualizo en configuración BATCH ejecutandose:
+			  Bloqueo el batch para que no se ejecute si entra nuevamente */
+			consultaDao.actualizarEstadoActualizacionBatch(ConsultaDao.ESTADO_ACTUALIZACION_ACTUALIZANDO);
+			/*Recorro las sucursales para actualizar*/
+			for (Sucursal suc : consultaDao.getSucursales()) {
+				int idSuc = suc.getId_sat();
+				try {
+					preSucursalActualizacion(suc);
+				} catch (Exception e) {
+					System.out.println("ERROR: No se puede establecer comunicación con la central: "+ suc.getNom_sucursal());
+				} finally {
+					/*Desbloqueo la Sucursal para que pueda Actualizarce*/
+					consultaDao.actualizarEstadoActualizacion(ConsultaDao.ESTADO_ACTUALIZACION_NOACTUALIZA, idSuc);
+				}
 			}
 		}
+		/*Desbloqueo la ejecución del batch para liberarlo y que pueda Actualizarse*/
+		consultaDao.actualizarEstadoActualizacionBatch(ConsultaDao.ESTADO_ACTUALIZACION_NOACTUALIZA);
 		
-		actualizarPeriodoBatch (context);
+	}
+
+	private void preSucursalActualizacion(Sucursal suc) throws Exception {
+		int idSuc = suc.getId_sat();
+		/*Verifico si la sucursal no se esta actualizando en este momento*/
+		String estadoActualizacionSucursal = consultaDao.getEstadoActualizacion(idSuc);
+		if (estadoActualizacionSucursal.equals(ConsultaDao.ESTADO_ACTUALIZACION_NOACTUALIZA)){
+			/*Bloqueo la Sucursal para que se actualice*/
+			consultaDao.actualizarEstadoActualizacion(ConsultaDao.ESTADO_ACTUALIZACION_ACTUALIZANDO, idSuc);
+			/* Actualizo en la central, los turnos NO llamados en la Sucursal*/
+			actualizoEstadoTurnosCentral(suc);
+			/*Actualizo en la central la información de nuevos turnos ingresados en la sucursal*/
+			actualizoCentral(suc);
+			
+			
+		} else {
+			System.out.println("WARNING: Sucursal en proceso de actualización");
+		}
 	}
 	
+	
 	/**
-	 * Actualiza los datos de la central
+	 * Actualiza nuevos datos de la central
 	 * 
 	 * @param suc
 	 * @throws Exception
@@ -79,7 +101,7 @@ public class SchedulerJob implements Job {
 		//Consulto las estadisticas
 		RestTemplate restTemplate = new RestTemplate();
 //		ResponseEntity<String> response = restTemplate.getForEntity("http://192.168.2.103/SAT-TurneroRestApi/servicio/test",String.class);
-		TurnoEstadistica[] turnos = restTemplate.getForObject(PROTOCOLO+suc.getIP()+PROYECTO+SERVICIO+"?id="+idUltimoTurnoSuc, TurnoEstadistica[].class);
+		TurnoEstadistica[] turnos = restTemplate.getForObject(PROTOCOLO+suc.getIP()+PROYECTO+SERVICIO_ESTADISTICAS+"?id="+idUltimoTurnoSuc, TurnoEstadistica[].class);
 
 		//Actualizo la fecha de ultima comprobacion
 		consultaDao.actualizarUltimaComprobacion(suc.getId_sat());
@@ -90,7 +112,25 @@ public class SchedulerJob implements Job {
 
 	}
 	
-	
+	/**
+	 * Actualiza Turnos llamados de la central
+	 * 
+	 * @param suc
+	 * @throws Exception
+	 */
+	private synchronized void actualizoEstadoTurnosCentral(Sucursal suc) throws Exception{
+		int idUltimoTurnoSuc  =consultaDao.getIdUltimoTurnoSucursalByIdSucursal(suc.getId_sat());
+
+		//Consulto las estadisticas
+		RestTemplate restTemplate = new RestTemplate();
+//		ResponseEntity<String> response = restTemplate.getForEntity("http://192.168.2.103/SAT-TurneroRestApi/servicio/test",String.class);
+		TurnoEstadistica[] turnos = restTemplate.getForObject(PROTOCOLO+suc.getIP()+PROYECTO+SERVICIO_ACTUALIZA_LLAMADOS+"?id="+idUltimoTurnoSuc, TurnoEstadistica[].class);
+
+		//Actualizo los turnos atendidos 
+		consultaDao.actualizarTurnosAtendidos(turnos,suc.getId_sat());
+
+
+	}
 
 	/**
 	 * Este metodo reconfigura el periodo de ejecución de con que se consultará a los quioscos
@@ -99,9 +139,11 @@ public class SchedulerJob implements Job {
 	 */
 	private void actualizarPeriodoBatch (JobExecutionContext context){
     	RestTemplate restTemplate = new RestTemplate();
-    	restTemplate.getForEntity("http://localhost:8080/CESAT-TurneroBatch/servicio/updatePeriodBatch",String.class);
+    	restTemplate.getForEntity(SERVICIO_BATCH_ACTUALIZAR_PERIODO,String.class);
 
 	}
+
+	
 	
 	/**
 	 * Este metodo reconfigura el periodo de ejecución de con que se consultará a los quioscos

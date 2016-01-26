@@ -88,5 +88,67 @@ public class ConsultaDaoImpl extends BaseDao implements ConsultaDao {
 
 		return lista;
 	}
+	
+	@Override
+	public synchronized List<TurnoEstadistica> getActualizaTurnosLlamados(Integer ultimoId) {
+		List<TurnoEstadistica> lista = new ArrayList<TurnoEstadistica>();
+
+		try {
+			statement = getConn();
+			String where = " WHERE id_turno < " + ultimoId + " AND llamado like 'SI' AND DATE_FORMAT(fecha_ticket,'%Y-%m-%d') = DATE_FORMAT(CURDATE(),'%Y-%m-%d') " ;
+			String orderBy = " order by id_turno ; ";
+			resultSet = statement.executeQuery(CONSULTA + where + orderBy);
+			
+			while (resultSet.next()) {
+				TurnoEstadistica dto = new TurnoEstadistica();
+				dto.setId_sat(resultSet.getInt("id_sat"));
+				dto.setCod_sucursal(resultSet.getString("cod_sucursal"));
+				dto.setAtendido(resultSet.getString("atendido"));
+				dto.setId_turno(resultSet.getInt("id_turno"));
+				dto.setId_cod_sector(resultSet.getString("id_cod_sector"));
+				dto.setNumero_turno(resultSet.getInt("numero_turno"));
+				dto.setFecha_ticket(resultSet.getDate("fecha_ticket"));
+				dto.setFecha_ticketTest(resultSet.getString("fecha_ticket_test"));
+				dto.setLlamado(resultSet.getString("llamado"));
+				dto.setFecha_atencionTest(resultSet.getString("fecha_atencion"));
+				dto.setFecha_finTest(resultSet.getString("fecha_fin"));
+				dto.setNom_sucursal(resultSet.getString("nom_sucursal"));
+
+				dto.setNom_sector(resultSet.getString("nom_sector"));
+
+				//dto.setFecha_atencion(resultSet.getDate("fecha_atencion"));
+				dto.setNro_puesto(resultSet.getInt("nro_puesto"));
+				dto.setNom_usuario(resultSet.getString("nom_usuario"));
+				dto.setAtendido(resultSet.getString("atendido"));
+				//dto.setFecha_fin(resultSet.getDate("fecha_fin"));
+				lista.add(dto);
+			}
+
+
+		} catch (Exception e) {
+			System.out.println("ERROR");
+		} finally {
+
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+
+				statement = null;
+			}
+		}
+
+		return lista;
+	}
 		
 }

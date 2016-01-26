@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ar.com.osdepym.turnerobatch.bean.PeriodBatch;
+import ar.com.osdepym.turnerobatch.model.dao.ConsultaDao;
+import ar.com.osdepym.turnerobatch.model.dao.impl.ConsultaDaoImpl;
 /**
  * 
  * Esta clase contiene servicios batch
@@ -47,7 +49,7 @@ public class UpdateBatchService {
         StdSchedulerFactory factory = (StdSchedulerFactory) ctx.getAttribute(QuartzInitializerListener.QUARTZ_FACTORY_KEY);
         Scheduler scheduler;
 		try {
-			scheduler = factory.getScheduler();
+			scheduler = factory.getScheduler("MyScheduler");
 			
 			Trigger oldTrigger = scheduler.getTrigger(new TriggerKey("dummyTriggerName"));
 			// Obtengo como fue configurado
@@ -83,7 +85,7 @@ public class UpdateBatchService {
         StdSchedulerFactory factory = (StdSchedulerFactory) ctx.getAttribute(QuartzInitializerListener.QUARTZ_FACTORY_KEY);
         Scheduler scheduler;
 		try {
-			scheduler = factory.getScheduler();
+			scheduler = factory.getScheduler("MyScheduler");
 			
 			Trigger oldTrigger = scheduler.getTrigger(new TriggerKey("dummyTriggerName"));
 			// Obtengo como fue configurado
@@ -103,5 +105,13 @@ public class UpdateBatchService {
 		}    
 		
 		return "OK";
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@RequestMapping("/obtenerEstadoBatch")
+	public String p(HttpServletRequest req) throws InterruptedException {
+        ConsultaDao dao = new ConsultaDaoImpl();
+        
+        return dao.getEstadoActualizacionBatch();
 	}
 }

@@ -2,7 +2,6 @@ package ar.com.osdepym.turnerobatch.model.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,6 +20,9 @@ public class BaseDao {
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
+	protected Statement statement = null;
+	protected ResultSet resultSet = null;
+    
     private Connection connect = null;
     
 	/**tos
@@ -40,4 +42,43 @@ public class BaseDao {
         // statements allow to issue SQL queries to the database
         return connect.createStatement();
 	}
+	
+	protected void setAutocomitFalse(){
+		try {
+			connect.setAutoCommit(false);
+		} catch (SQLException e) {
+			System.out.println("Error autocommit");
+		}
+	}
+	
+	protected void setCommitTran(){
+		try {
+			connect.commit();
+		} catch (SQLException e) {
+			System.out.println("Error Commit transaction");
+		}
+	}
+
+	protected void closeConn() {
+		
+		if (resultSet != null) {
+			try {
+				resultSet.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (statement != null) {
+			try {
+				statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			statement = null;
+		}
+	}
+	
+	
 }

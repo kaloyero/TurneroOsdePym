@@ -12,4 +12,6 @@ import ar.com.osdepym.turnerorestapi.model.TurnoEstadistica;
  */
 public interface ConsultaDao {
 	  public List<TurnoEstadistica> getEstadisticas(Integer ultimoId);
+
+	List<TurnoEstadistica> getActualizaTurnosLlamados(Integer ultimoId);
 }

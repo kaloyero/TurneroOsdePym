@@ -1,9 +1,5 @@
 package ar.com.osdepym.turnerobatch.model.query;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import ar.com.osdepym.turnerobatch.model.dao.BaseDao;
 
 /**
@@ -14,8 +10,6 @@ import ar.com.osdepym.turnerobatch.model.dao.BaseDao;
  */
 public class ConfigurationQuery extends BaseDao{
 
-    private Statement statement = null;
-    private ResultSet resultSet = null;
     
     /**
      * Devuelve de la base de datos el periodo de repeticion con que se repetir[a la actualizacion de turnos
@@ -36,26 +30,9 @@ public class ConfigurationQuery extends BaseDao{
             }
 
         } catch (Exception e) {
-System.out.println(e);
+        	System.out.println(e);
         } finally {
-
-            if(resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                statement = null;
-            }
+        	closeConn();
         }
     	return batchPeriod;
     }
